@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Andromeda Scum - Вход</title>
+</head>
+<body>
+  <h1>Регистрация / Вход</h1>
+  <form id="authForm">
+    <input type="text" id="nickname" placeholder="Ник" required />
+    <input type="password" id="password" placeholder="Пароль" required />
+    <button type="submit">Войти / Зарегистрироваться</button>
+  </form>
+  <div id="message"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbj4KLyz0odB766u0RVW-gVEB-OskamQU",
+      authDomain: "andromeda-scum.firebaseapp.com",
+      projectId: "andromeda-scum",
+      storageBucket: "andromeda-scum.firebasestorage.app",
+      messagingSenderId: "641756358533",
+      appId: "1:641756358533:web:05e4dd43414c6238c786ec",
+      measurementId: "G-3CP2PRT3EY"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById('authForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      messageDiv.textContent = '';
+
+      const nickname = form.nickname.value.trim();
+      const password = form.password.value;
+
+      if (!nickname || !password) {
+        messageDiv.textContent = 'Введите ник и пароль';
+        return;
+      }
+
+      const email = nickname + '@example.com';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        messageDiv.textContent = `Добро пожаловать, ${nickname}! Вы вошли.`;
+      } catch (err) {
+        if (err.code === 'auth/user-not-found') {
+          try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            messageDiv.textContent = `Пользователь ${nickname} зарегистрирован и вошёл.`;
+          } catch (regErr) {
+            messageDiv.textContent = 'Ошибка регистрации: ' + regErr.message;
+          }
+        } else {
+          messageDiv.textContent = 'Ошибка входа: ' + err.message;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
